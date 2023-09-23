@@ -19,6 +19,12 @@ void initialize_registers(BOFHeader bin_header)
     GPR[SP] = bin_header.stack_bottom_addr;
 }
 
+void fill_instruction_reg(BOFFILE bf, BOFHeader bin_header)
+{
+    for (int i = PC; i < PC + (bin_header.text_length / BYTES_PER_WORD); i++)
+        IR[i] = instruction_read(bf);
+}
+
 int main(int argc, char *argv[])  
 {
     BOFFILE bf;
@@ -37,14 +43,7 @@ int main(int argc, char *argv[])
     if (GPR[FP] % 4 != 0 || GPR[FP] < GPR[GP])
         bail_with_error("Invalid stack bottom");
 
-    // printf("%d %d %d %d %d\n", bfh.text_start_address, bfh.text_length, bfh.data_start_address, bfh.data_length, bfh.stack_bottom_addr);
-    /*
-    for (int i = 0; i < 32; i++)
-    {
-        printf("[%s]: %d\n", regname_get(i), GPR[i]);
-    } */
-
     // Read in instructions from BOF to IR
-    for (int i = bfh.text_start_address; i < bfh.text_start_address + (bfh.text_length / BYTES_PER_WORD); i++)
-        IR[i] = instruction_read(bf);
+    fill_instruction_reg(bf, bfh);
+    
 }
