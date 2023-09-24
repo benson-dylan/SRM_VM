@@ -1,15 +1,21 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "instruction.h"
 #include "machine_types.h"
 #include "utilities.h"
 #include "regname.h"
 #include "bof.h"
+#include "machine.h"
 
 #define MEMORY_SIZE_IN_BYTES (65536 - BYTES_PER_WORD)
+#define HI 0
+#define LO 1
 
 int PC;
 int GPR[NUM_REGISTERS];
+int HI_LO[2];
 bin_instr_t IR[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
+bool JUMP = false;
 
 void initialize_registers(BOFHeader bin_header)
 {
@@ -23,6 +29,20 @@ void fill_instruction_reg(BOFFILE bf, BOFHeader bin_header)
 {
     for (int i = PC; i < PC + (bin_header.text_length / BYTES_PER_WORD); i++)
         IR[i] = instruction_read(bf);
+}
+
+void print_GPR(int * GPR)
+{
+    printf("PC: %d\n", PC);
+
+    for (int i = 0; i < 32; i++)
+    {
+        if (i % 6 == 0 && i != 0)
+            printf("\n");
+        printf("GPR[%s]: %d   ", regname_get(i), GPR[i]);
+    }
+
+    printf("\n");
 }
 
 int main(int argc, char *argv[])  
@@ -45,5 +65,143 @@ int main(int argc, char *argv[])
 
     // Read in instructions from BOF to IR
     fill_instruction_reg(bf, bfh);
+
+    while (true)
+    {
+        print_GPR(GPR);
+        JUMP = false;
+        //printf("PC: %d\n", PC);
+        bin_instr_t curr_instr = IR[PC / 4];
+
+        if (instruction_type(curr_instr) == reg_instr_type)
+        {
+            reg_instr_t ri = curr_instr.reg;
+
+            switch (ri.func)
+            {
+                case ADD_F:
+                    add_op(ri, GPR);
+                    break;
+                case SUB_F:
+                    sub_op(ri, GPR);
+                    break;
+                case MUL_F:
+                    mul_op(ri, GPR, HI_LO);
+                    break;
+                case DIV_F:
+                    div_op(ri, GPR, HI_LO);
+                    break;
+                case MFHI_F:
+                    mfhi_op(ri, GPR, HI_LO);
+                    break;
+                case MFLO_F:
+                    mflo_op(ri, GPR, HI_LO);
+                    break;
+                case AND_F:
+                    and_op(ri, GPR);
+                    break;
+                case BOR_F:
+                    bor_op(ri, GPR);
+                    break;
+                case NOR_F:
+                    nor_op(ri, GPR);
+                    break;
+                case XOR_F:
+                    xor_op(ri, GPR);
+                    break;
+                case SLL_F:
+                    sll_op(ri, GPR);
+                    break;
+                case SRL_F:
+                    srl_op(ri, GPR);
+                    break;
+                case JR_F:
+                    PC = jr_op(ri, GPR);
+                    break;
+                case SYSCALL_F:
+                    break;
+            }
+        }
+
+        else if (instruction_type(curr_instr) == immed_instr_type)
+        {
+            immed_instr_t ii = curr_instr.immed;
+
+            switch (ii.op)
+            {
+                case ADDI_O:
+                    addi_op(ii, GPR);
+                    break;
+                case ANDI_O:
+                    break;
+                case BORI_O:
+                    break;
+                case XORI_O:
+                    break;
+                case BEQ_O:
+                    break;
+                case BGEZ_O:
+                    break;
+                case BGTZ_O:
+                    break;
+                case BLEZ_O:
+                    break;
+                case BLTZ_O:
+                    break;
+                case BNE_O:
+                    break;
+                case LBU_O:
+                    break;
+                case LW_O:
+                    break;
+                case SB_O:
+                    break;
+                case SW_O:
+                    break;
+            }
+        }
+
+        else if (instruction_type(curr_instr) == jump_instr_type)
+        {
+            jump_instr_t ji = curr_instr.jump;
+
+            switch (ji.op)
+            {
+                case JMP_O:
+                    PC = jmp_op(ji, PC);
+                    JUMP = true;
+                    break;
+                case JAL_O:
+                    PC = jal_op(ji, PC, GPR);
+                    JUMP = true;
+                    break;
+            }
+        }
+
+        else if (instruction_type(curr_instr) == syscall_instr_type)
+        {
+            syscall_instr_t si = curr_instr.syscall;
+
+            switch (si.code)
+            {
+                case exit_sc:
+                    exit(0);
+                    break;
+                case print_str_sc:
+                    break;
+                case print_char_sc:
+                    break;
+                case read_char_sc:
+                    break;
+                case start_tracing_sc:
+                    break;
+                case stop_tracing_sc:
+                    break;
+            }
+        }
+
+        //if (!JUMP)
+        PC += 4;
+    }
     
 }
