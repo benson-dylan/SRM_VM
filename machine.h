@@ -38,25 +38,25 @@ void bori_op(immed_instr_t ii, int * GPR);
 
 void xori_op(immed_instr_t ii, int * GPR);
 
-void beq_op(immed_instr_t ii, int * GPR);
+int beq_op(immed_instr_t ii, int * GPR);
 
-void bgez_op(immed_instr_t ii, int * GPR);
+int bgez_op(immed_instr_t ii, int * GPR);
 
-void bgtz_op(immed_instr_t ii, int * GPR);
+int bgtz_op(immed_instr_t ii, int * GPR);
 
-void blez_op(immed_instr_t ii, int * GPR);
+int blez_op(immed_instr_t ii, int * GPR);
 
-void bltz_op(immed_instr_t ii, int * GPR);
+int bltz_op(immed_instr_t ii, int * GPR);
 
-void bne_op(immed_instr_t ii, int * GPR);
+int bne_op(immed_instr_t ii, int * GPR);
 
-void lbu_op(immed_instr_t ii, int * GPR);
+void lbu_op(immed_instr_t ii, int * GPR, word_type * memory);
 
-void lw_op(immed_instr_t ii, int * GPR);
+void lw_op(immed_instr_t ii, int * GPR, word_type * memory);
 
-void sb_op(immed_instr_t ii, int * GPR);
+void sb_op(immed_instr_t ii, int * GPR, word_type * memory);
 
-void sw_op(immed_instr_t ii, int * GPR);
+void sw_op(immed_instr_t ii, int * GPR, word_type * memory);
 
 // Jump Operations
 

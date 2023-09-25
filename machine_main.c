@@ -72,9 +72,11 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        print_GPR(GPR);
+        printf("%d\n", PC);
+        // print_GPR(GPR);
         JUMP = false;
         //printf("PC: %d\n", PC);
+
         // Load instruction from memory
         typedef union {
             bin_instr_t instr;
@@ -85,6 +87,8 @@ int main(int argc, char *argv[])
 
         if (instruction_type(IR) == reg_instr_type)
         {
+            printf("Register Operation\n");
+
             reg_instr_t ri = IR.reg;
             switch (ri.func)
             {
@@ -134,6 +138,8 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == immed_instr_type)
         {
+            printf("Immediate Operation\n");
+
             immed_instr_t ii = IR.immed;
             switch (ii.op)
             {
@@ -141,36 +147,57 @@ int main(int argc, char *argv[])
                     addi_op(ii, GPR);
                     break;
                 case ANDI_O:
+                    andi_op(ii, GPR);
                     break;
                 case BORI_O:
+                    bori_op(ii, GPR);
                     break;
                 case XORI_O:
+                    xori_op(ii, GPR);
                     break;
                 case BEQ_O:
+                    PC += beq_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case BGEZ_O:
+                    PC += bgez_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case BGTZ_O:
+                    PC += bgtz_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case BLEZ_O:
+                    PC += blez_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case BLTZ_O:
+                    PC += bltz_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case BNE_O:
+                    PC += bne_op(ii, GPR);
+                    JUMP = true;
                     break;
                 case LBU_O:
+                    lbu_op(ii, GPR, memory);
                     break;
                 case LW_O:
+                    lw_op(ii, GPR, memory);
                     break;
                 case SB_O:
+                    sb_op(ii, GPR, memory);
                     break;
                 case SW_O:
+                    sw_op(ii, GPR, memory);
                     break;
             }
         }
 
         else if (instruction_type(IR) == jump_instr_type)
         {
+            printf("Jump Operation\n");
+
             jump_instr_t ji = IR.jump;
             switch (ji.op)
             {
@@ -187,6 +214,8 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == syscall_instr_type)
         {
+            printf("Syscall Operation\n");
+
             syscall_instr_t si = IR.syscall;
             switch (si.code)
             {
@@ -206,7 +235,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        //if (!JUMP)
-        PC += 4;
+        if (!JUMP)
+            PC += 4;
     }    
 }

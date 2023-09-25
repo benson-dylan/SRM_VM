@@ -83,15 +83,96 @@ void addi_op(immed_instr_t ii, int * GPR)
     GPR[ii.rt] = GPR[ii.rs] + machine_types_sgnExt(ii.immed);
 }
 
+void andi_op(immed_instr_t ii, int * GPR)
+{
+    GPR[ii.rt] = GPR[ii.rs] & machine_types_zeroExt(ii.immed);
+}
+
+void bori_op(immed_instr_t ii, int * GPR)
+{
+    GPR[ii.rt] = GPR[ii.rs] | machine_types_zeroExt(ii.immed);
+}
+
+void xori_op(immed_instr_t ii, int * GPR)
+{
+    GPR[ii.rt] = GPR[ii.rs] ^ machine_types_zeroExt(ii.immed);
+}
+
+int beq_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] == GPR[ii.rt])
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+int bgez_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] >= 0)
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+int bgtz_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] > 0)
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+int blez_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] <= 0)
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+int bltz_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] < 0)
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+int bne_op(immed_instr_t ii, int * GPR)
+{
+    if (GPR[ii.rs] != 0)
+        return machine_types_formOffset(ii.immed);
+    return 0;
+}
+
+void lbu_op(immed_instr_t ii, int * GPR, word_type * memory)
+{
+    GPR[ii.rt] = machine_types_zeroExt(memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)]);
+}
+
+void lw_op(immed_instr_t ii, int * GPR, word_type * memory)
+{
+    GPR[ii.rt] = memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)];
+}
+
+void sb_op(immed_instr_t ii, int * GPR, word_type * memory)
+{
+    memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = (uint8_t) GPR[ii.rt];
+}
+
+void sw_op(immed_instr_t ii, int * GPR, word_type * memory)
+{
+    memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = GPR[ii.rt];
+}
+
 // Jump Operations
 
 int jmp_op(jump_instr_t ji, int PC)
 {
-    return machine_types_formAddress(PC, ji.addr);
+    int jumpAddr = machine_types_formAddress(PC, ji.addr);
+    printf("Jump Addr: %d\n", jumpAddr); 
+    return jumpAddr;
 }
 
 int jal_op(jump_instr_t ji, int PC, int * GPR)
 {
+    int jumpAddr = machine_types_formAddress(PC, ji.addr);
+    printf("Jump Addr: %d\n", jumpAddr); 
     GPR[31] = PC;
-    return machine_types_formAddress(PC, ji.addr);
+    return jumpAddr;
 }
