@@ -14,7 +14,7 @@
 int PC;
 int GPR[NUM_REGISTERS];
 int HI_LO[2];
-bin_instr_t IR[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
+word_type memory[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
 bool JUMP = false;
 
 void initialize_registers(BOFHeader bin_header)
@@ -28,7 +28,7 @@ void initialize_registers(BOFHeader bin_header)
 void fill_instruction_reg(BOFFILE bf, BOFHeader bin_header)
 {
     for (int i = PC; i < PC + (bin_header.text_length / BYTES_PER_WORD); i++)
-        IR[i] = instruction_read(bf);
+        memory[i] = bof_read_word(bf);
 }
 
 void print_GPR(int * GPR)
@@ -53,9 +53,11 @@ int main(int argc, char *argv[])
     else 
         bf = bof_read_open(argv[2]);
 
+    // Initialize header values
     BOFHeader bfh = bof_read_header(bf);
     initialize_registers(bfh);
 
+    // Validate header values
     if (PC % 4 != 0 || PC > GPR[GP])
         bail_with_error("Invalid PC start");
     if (GPR[GP] % 4 != 0)
@@ -65,18 +67,24 @@ int main(int argc, char *argv[])
 
     // Read in instructions from BOF to IR
     fill_instruction_reg(bf, bfh);
+    
 
     while (true)
     {
         print_GPR(GPR);
         JUMP = false;
         //printf("PC: %d\n", PC);
-        bin_instr_t curr_instr = IR[PC / 4];
+        // Load instruction from memory
+        typedef union {
+            bin_instr_t instr;
+            word_type instr_word;
+        } instr_cast;
+        instr_cast curr_cast = { .instr_word = memory[PC / 4]};
+        bin_instr_t IR = curr_cast.instr;
 
-        if (instruction_type(curr_instr) == reg_instr_type)
+        if (instruction_type(IR) == reg_instr_type)
         {
-            reg_instr_t ri = curr_instr.reg;
-
+            reg_instr_t ri = IR.reg;
             switch (ri.func)
             {
                 case ADD_F:
@@ -123,10 +131,9 @@ int main(int argc, char *argv[])
             }
         }
 
-        else if (instruction_type(curr_instr) == immed_instr_type)
+        else if (instruction_type(IR) == immed_instr_type)
         {
-            immed_instr_t ii = curr_instr.immed;
-
+            immed_instr_t ii = IR.immed;
             switch (ii.op)
             {
                 case ADDI_O:
@@ -161,10 +168,9 @@ int main(int argc, char *argv[])
             }
         }
 
-        else if (instruction_type(curr_instr) == jump_instr_type)
+        else if (instruction_type(IR) == jump_instr_type)
         {
-            jump_instr_t ji = curr_instr.jump;
-
+            jump_instr_t ji = IR.jump;
             switch (ji.op)
             {
                 case JMP_O:
@@ -178,10 +184,9 @@ int main(int argc, char *argv[])
             }
         }
 
-        else if (instruction_type(curr_instr) == syscall_instr_type)
+        else if (instruction_type(IR) == syscall_instr_type)
         {
-            syscall_instr_t si = curr_instr.syscall;
-
+            syscall_instr_t si = IR.syscall;
             switch (si.code)
             {
                 case exit_sc:
