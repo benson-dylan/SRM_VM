@@ -14,21 +14,19 @@
 int PC;
 int GPR[NUM_REGISTERS];
 int HI_LO[2];
-word_type memory[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
-bool JUMP = false;
 
 void initialize_registers(BOFHeader bin_header)
 {
     PC = bin_header.text_start_address;
     GPR[GP] = bin_header.data_start_address;
     GPR[FP] = bin_header.stack_bottom_addr;
-    GPR[SP] = bin_header.stack_bottom_addr;
+    GPR[SP] = bin_header.stack_bottom_addr; 
 }
 
-void fill_instruction_reg(BOFFILE bf, BOFHeader bin_header)
+void load_words(BOFFILE bf, word_type* memory, word_type start_address, word_type read_length)
 {
-    for (int i = PC; i < PC + (bin_header.text_length / BYTES_PER_WORD); i++)
-        memory[i] = bof_read_word(bf);
+    for (int i = start_address; i < start_address + (read_length / BYTES_PER_WORD); i++)
+        memory[i] =  bof_read_word(bf);
 }
 
 void print_GPR(int * GPR)
@@ -46,7 +44,11 @@ void print_GPR(int * GPR)
 }
 
 int main(int argc, char *argv[])  
-{
+{   
+    word_type memory[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
+    bin_instr_t IR;
+    bool JUMP = false;
+
     BOFFILE bf;
     if (argc == 2)
         bf = bof_read_open(argv[1]);
@@ -65,9 +67,8 @@ int main(int argc, char *argv[])
     if (GPR[FP] % 4 != 0 || GPR[FP] < GPR[GP])
         bail_with_error("Invalid stack bottom");
 
-    // Read in instructions from BOF to IR
-    fill_instruction_reg(bf, bfh);
-    
+    load_words(bf, memory, PC, bfh.text_length); // Load instructions
+    load_words(bf, memory, GPR[GP], bfh.data_length); // Load data
 
     while (true)
     {
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
             word_type instr_word;
         } instr_cast;
         instr_cast curr_cast = { .instr_word = memory[PC / 4]};
-        bin_instr_t IR = curr_cast.instr;
+        IR = curr_cast.instr;
 
         if (instruction_type(IR) == reg_instr_type)
         {
@@ -190,7 +191,7 @@ int main(int argc, char *argv[])
             switch (si.code)
             {
                 case exit_sc:
-                    exit(0);
+                    return 0;
                     break;
                 case print_str_sc:
                     break;
@@ -207,6 +208,5 @@ int main(int argc, char *argv[])
 
         //if (!JUMP)
         PC += 4;
-    }
-    
+    }    
 }
