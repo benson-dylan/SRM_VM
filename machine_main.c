@@ -77,17 +77,15 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        printf("%d\n", PC);
-        // print_GPR(GPR);
+        print_GPR(GPR);
         JUMP = false;
-        //printf("PC: %d\n", PC);
 
         // Load instruction from memory
         IR = memory.instrs[PC / BYTES_PER_WORD];
 
         if (instruction_type(IR) == reg_instr_type)
         {
-            printf("Register Operation\n");
+            // printf("Register Operation\n");
 
             reg_instr_t ri = IR.reg;
             switch (ri.func)
@@ -138,7 +136,7 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == immed_instr_type)
         {
-            printf("Immediate Operation\n");
+            // printf("Immediate Operation\n");
 
             immed_instr_t ii = IR.immed;
             switch (ii.op)
@@ -156,28 +154,46 @@ int main(int argc, char *argv[])
                     xori_op(ii, GPR);
                     break;
                 case BEQ_O:
-                    PC += beq_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] == GPR[ii.rt])
+                    {    
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case BGEZ_O:
-                    PC += bgez_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] >= 0)
+                    {
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case BGTZ_O:
-                    PC += bgtz_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] > 0)
+                    {
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case BLEZ_O:
-                    PC += blez_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] <= 0)
+                    {
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case BLTZ_O:
-                    PC += bltz_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] < 0)
+                    {
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case BNE_O:
-                    PC += bne_op(ii, GPR);
-                    JUMP = true;
+                    if (GPR[ii.rs] != 0)
+                    {
+                        PC += branch_op(ii, GPR);
+                        JUMP = true;
+                    }
                     break;
                 case LBU_O:
                     lbu_op(ii, GPR, memory.words);
@@ -196,7 +212,7 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == jump_instr_type)
         {
-            printf("Jump Operation\n");
+            // printf("Jump Operation\n");
 
             jump_instr_t ji = IR.jump;
             switch (ji.op)
@@ -214,7 +230,7 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == syscall_instr_type)
         {
-            printf("Syscall Operation\n");
+            // printf("Syscall Operation\n");
 
             syscall_instr_t si = IR.syscall;
             switch (si.code)

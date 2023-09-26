@@ -98,46 +98,9 @@ void xori_op(immed_instr_t ii, int *GPR)
     GPR[ii.rt] = GPR[ii.rs] ^ machine_types_zeroExt(ii.immed);
 }
 
-int beq_op(immed_instr_t ii, int *GPR)
+int branch_op(immed_instr_t ii, int *GPR)
 {
-    if (GPR[ii.rs] == GPR[ii.rt])
-        return machine_types_formOffset(ii.immed);
-    return 0;
-}
-
-int bgez_op(immed_instr_t ii, int *GPR)
-{
-    if (GPR[ii.rs] >= 0)
-        return machine_types_formOffset(ii.immed);
-    return 0;
-}
-
-int bgtz_op(immed_instr_t ii, int *GPR)
-{
-    if (GPR[ii.rs] > 0)
-        return machine_types_formOffset(ii.immed);
-    return 0;
-}
-
-int blez_op(immed_instr_t ii, int *GPR)
-{
-    if (GPR[ii.rs] <= 0)
-        return machine_types_formOffset(ii.immed);
-    return 0;
-}
-
-int bltz_op(immed_instr_t ii, int *GPR)
-{
-    if (GPR[ii.rs] < 0)
-        return machine_types_formOffset(ii.immed);
-    return 0;
-}
-
-int bne_op(immed_instr_t ii, int *GPR)
-{
-    if (GPR[ii.rs] != 0)
-        return machine_types_formOffset(ii.immed);
-    return 0;
+    return machine_types_formOffset(ii.immed);
 }
 
 void lbu_op(immed_instr_t ii, int *GPR, word_type *memory)

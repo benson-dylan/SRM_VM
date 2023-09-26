@@ -38,17 +38,7 @@ void bori_op(immed_instr_t ii, int *GPR);
 
 void xori_op(immed_instr_t ii, int *GPR);
 
-int beq_op(immed_instr_t ii, int *GPR);
-
-int bgez_op(immed_instr_t ii, int *GPR);
-
-int bgtz_op(immed_instr_t ii, int *GPR);
-
-int blez_op(immed_instr_t ii, int *GPR);
-
-int bltz_op(immed_instr_t ii, int *GPR);
-
-int bne_op(immed_instr_t ii, int *GPR);
+int branch_op(immed_instr_t ii, int *GPR);
 
 void lbu_op(immed_instr_t ii, int *GPR, word_type *memory);
 
