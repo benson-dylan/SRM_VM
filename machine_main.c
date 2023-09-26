@@ -11,6 +11,12 @@
 #define HI 0
 #define LO 1
 
+static union mem_u {
+    byte_type bytes[MEMORY_SIZE_IN_BYTES];
+    word_type words[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
+    bin_instr_t instrs[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
+} memory;
+
 int PC;
 int GPR[NUM_REGISTERS];
 int HI_LO[2];
@@ -23,10 +29,10 @@ void initialize_registers(BOFHeader bin_header)
     GPR[SP] = bin_header.stack_bottom_addr; 
 }
 
-void load_words(BOFFILE bf, word_type* memory, word_type start_address, word_type read_length)
+void load_words(BOFFILE bf, word_type start_address, word_type read_length)
 {
     for (int i = start_address; i < start_address + (read_length / BYTES_PER_WORD); i++)
-        memory[i] =  bof_read_word(bf);
+        memory.words[i] =  bof_read_word(bf);
 }
 
 void print_GPR(int * GPR)
@@ -45,7 +51,6 @@ void print_GPR(int * GPR)
 
 int main(int argc, char *argv[])  
 {   
-    word_type memory[MEMORY_SIZE_IN_BYTES / BYTES_PER_WORD];
     bin_instr_t IR;
     bool JUMP = false;
 
@@ -67,8 +72,8 @@ int main(int argc, char *argv[])
     if (GPR[FP] % 4 != 0 || GPR[FP] < GPR[GP])
         bail_with_error("Invalid stack bottom");
 
-    load_words(bf, memory, PC, bfh.text_length); // Load instructions
-    load_words(bf, memory, GPR[GP], bfh.data_length); // Load data
+    load_words(bf, PC, bfh.text_length); // Load instructions
+    load_words(bf, GPR[GP], bfh.data_length); // Load data
 
     while (true)
     {
@@ -78,12 +83,7 @@ int main(int argc, char *argv[])
         //printf("PC: %d\n", PC);
 
         // Load instruction from memory
-        typedef union {
-            bin_instr_t instr;
-            word_type instr_word;
-        } instr_cast;
-        instr_cast curr_cast = { .instr_word = memory[PC / 4]};
-        IR = curr_cast.instr;
+        IR = memory.instrs[PC / BYTES_PER_WORD];
 
         if (instruction_type(IR) == reg_instr_type)
         {
@@ -180,16 +180,16 @@ int main(int argc, char *argv[])
                     JUMP = true;
                     break;
                 case LBU_O:
-                    lbu_op(ii, GPR, memory);
+                    lbu_op(ii, GPR, memory.words);
                     break;
                 case LW_O:
-                    lw_op(ii, GPR, memory);
+                    lw_op(ii, GPR, memory.words);
                     break;
                 case SB_O:
-                    sb_op(ii, GPR, memory);
+                    sb_op(ii, GPR, memory.words);
                     break;
                 case SW_O:
-                    sw_op(ii, GPR, memory);
+                    sw_op(ii, GPR, memory.words);
                     break;
             }
         }

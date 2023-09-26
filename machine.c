@@ -7,155 +7,155 @@
 
 // Register Operations
 
-void add_op(reg_instr_t ri, int * GPR)
+void add_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rs] + GPR[ri.rt];
 }
 
-void sub_op(reg_instr_t ri, int * GPR)
+void sub_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rs] - GPR[ri.rt];
 }
 
-void mul_op(reg_instr_t ri, int * GPR, int * HI_LO)
+void mul_op(reg_instr_t ri, int *GPR, int *HI_LO)
 {
-    uint64_t result = GPR[ri.rt] * GPR[ri.rs];
+    uint64_t result = GPR[ri.rt] *GPR[ri.rs];
 
     HI_LO[HI] = (int) (result >> 32);
     HI_LO[LO] = (int) result;
 }
 
-void div_op(reg_instr_t ri, int * GPR, int * HI_LO)
+void div_op(reg_instr_t ri, int *GPR, int *HI_LO)
 {
     HI_LO[HI] = GPR[ri.rs] % GPR[ri.rt];
     HI_LO[LO] = GPR[ri.rs] / GPR[ri.rt];
 }
 
-void mfhi_op(reg_instr_t ri, int * GPR, int * HI_LO)
+void mfhi_op(reg_instr_t ri, int *GPR, int *HI_LO)
 {
     GPR[ri.rd] = HI_LO[HI];
 }
 
-void mflo_op(reg_instr_t ri, int * GPR, int * HI_LO)
+void mflo_op(reg_instr_t ri, int *GPR, int *HI_LO)
 {
     GPR[ri.rd] = HI_LO[LO];
 }
 
-void and_op(reg_instr_t ri, int * GPR)
+void and_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rs] & GPR[ri.rt];
 }
 
-void bor_op(reg_instr_t ri, int * GPR)
+void bor_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rs] | GPR[ri.rt];
 }
 
-void nor_op(reg_instr_t ri, int * GPR)
+void nor_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = ~(GPR[ri.rs] | GPR[ri.rt]);
 }
 
-void xor_op(reg_instr_t ri, int * GPR)
+void xor_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rs] ^ GPR[ri.rt];
 }
 
-void sll_op(reg_instr_t ri, int * GPR)
+void sll_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rt] << ri.shift;
 }
 
-void srl_op(reg_instr_t ri, int * GPR)
+void srl_op(reg_instr_t ri, int *GPR)
 {
     GPR[ri.rd] = GPR[ri.rt] >> ri.shift;
 }
 
-int jr_op(reg_instr_t ri, int * GPR)
+int jr_op(reg_instr_t ri, int *GPR)
 {
     return GPR[ri.rs];
 }
 
 // Immediate Operations
 
-void addi_op(immed_instr_t ii, int * GPR)
+void addi_op(immed_instr_t ii, int *GPR)
 {
     GPR[ii.rt] = GPR[ii.rs] + machine_types_sgnExt(ii.immed);
 }
 
-void andi_op(immed_instr_t ii, int * GPR)
+void andi_op(immed_instr_t ii, int *GPR)
 {
     GPR[ii.rt] = GPR[ii.rs] & machine_types_zeroExt(ii.immed);
 }
 
-void bori_op(immed_instr_t ii, int * GPR)
+void bori_op(immed_instr_t ii, int *GPR)
 {
     GPR[ii.rt] = GPR[ii.rs] | machine_types_zeroExt(ii.immed);
 }
 
-void xori_op(immed_instr_t ii, int * GPR)
+void xori_op(immed_instr_t ii, int *GPR)
 {
     GPR[ii.rt] = GPR[ii.rs] ^ machine_types_zeroExt(ii.immed);
 }
 
-int beq_op(immed_instr_t ii, int * GPR)
+int beq_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] == GPR[ii.rt])
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-int bgez_op(immed_instr_t ii, int * GPR)
+int bgez_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] >= 0)
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-int bgtz_op(immed_instr_t ii, int * GPR)
+int bgtz_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] > 0)
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-int blez_op(immed_instr_t ii, int * GPR)
+int blez_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] <= 0)
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-int bltz_op(immed_instr_t ii, int * GPR)
+int bltz_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] < 0)
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-int bne_op(immed_instr_t ii, int * GPR)
+int bne_op(immed_instr_t ii, int *GPR)
 {
     if (GPR[ii.rs] != 0)
         return machine_types_formOffset(ii.immed);
     return 0;
 }
 
-void lbu_op(immed_instr_t ii, int * GPR, word_type * memory)
+void lbu_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
     GPR[ii.rt] = machine_types_zeroExt(memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)]);
 }
 
-void lw_op(immed_instr_t ii, int * GPR, word_type * memory)
+void lw_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
     GPR[ii.rt] = memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)];
 }
 
-void sb_op(immed_instr_t ii, int * GPR, word_type * memory)
+void sb_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
     memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = (uint8_t) GPR[ii.rt];
 }
 
-void sw_op(immed_instr_t ii, int * GPR, word_type * memory)
+void sw_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
     memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = GPR[ii.rt];
 }
@@ -169,7 +169,7 @@ int jmp_op(jump_instr_t ji, int PC)
     return jumpAddr;
 }
 
-int jal_op(jump_instr_t ji, int PC, int * GPR)
+int jal_op(jump_instr_t ji, int PC, int *GPR)
 {
     int jumpAddr = machine_types_formAddress(PC, ji.addr);
     printf("Jump Addr: %d\n", jumpAddr); 
