@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
                     }
                     break;
                 case BNE_O:
-                    if (GPR[ii.rs] != 0)
+                    if (GPR[ii.rs] != GPR[ii.rt])
                     {
                         PC += branch_op(ii, GPR);
                         JUMP = true;
