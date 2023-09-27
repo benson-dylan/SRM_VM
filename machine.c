@@ -156,12 +156,12 @@ void pstr_call(int *GPR, word_type *memory)
     GPR[$v0] = res;
 }
 
-void pch_call(int *GPR, word_type *memory) 
+void pch_call(int *GPR) 
 {
     GPR[R_V0] = fputc(GPR[R_A0], stdout);
 }
 
-void rch_call(int *GPR, word_type *memory) 
+void rch_call(int *GPR) 
 {
     GPR[R_V0] = getc(stdin);
 }
