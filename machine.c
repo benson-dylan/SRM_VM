@@ -161,7 +161,7 @@ void pch_call(int *GPR, word_type *memory)
     GPR[R_V0] = fputc(GPR[R_A0], stdout);
 }
 
-void rcg_call(int *GPR, word_type *memory) 
+void rch_call(int *GPR, word_type *memory) 
 {
     GPR[R_V0] = getc(stdin);
 }
