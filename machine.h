@@ -54,4 +54,16 @@ int jmp_op(jump_instr_t ji, int PC);
 
 int jal_op(jump_instr_t ji, int PC, int *GPR);
 
+// System Calls 
+
+void exit_call();
+
+void pstr_call(int* GPR, word_type *memory);
+
+void pch_call(int* GPR, word_type *memory);
+
+void rch_call(int *GPR, word_type *memory);
+
+// missing stra and notr calls 
+
 #endif
