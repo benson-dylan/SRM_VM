@@ -60,9 +60,9 @@ void exit_call();
 
 void pstr_call(int* GPR, word_type *memory);
 
-void pch_call(int* GPR, word_type *memory);
+void pch_call(int* GPR);
 
-void rch_call(int *GPR, word_type *memory);
+void rch_call(int *GPR);
 
 // missing stra and notr calls 
 
