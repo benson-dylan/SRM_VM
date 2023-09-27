@@ -236,17 +236,23 @@ int main(int argc, char *argv[])
             switch (si.code)
             {
                 case exit_sc:
+                    exit_call();
                     return 0;
                     break;
                 case print_str_sc:
+                    pstr_call(GPR, memory.words);
                     break;
                 case print_char_sc:
+                    pch_call(GPR);
                     break;
                 case read_char_sc:
+                    rch_call(GPR);
                     break;
                 case start_tracing_sc:
+                    // stra_call();
                     break;
                 case stop_tracing_sc:
+                    // notr_call();
                     break;
             }
         }
