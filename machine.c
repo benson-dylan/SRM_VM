@@ -4,6 +4,8 @@
 
 #define HI 0
 #define LO 1
+#define R_A0 4
+#define R_V0 2
 
 // Register Operations
 
@@ -149,19 +151,19 @@ void exit_call()
 
 void pstr_call(int *GPR, word_type *memory) 
 {
-    char *str = (char *)&memory[GPR[$a0]];
+    char *str = (char *)&memory[GPR[R_A0]];
     int res = printf("%s", str);
     GPR[$v0] = res;
 }
 
 void pch_call(int *GPR, word_type *memory) 
 {
-    GPR[$v0] = fputc(GPR[$a0], stdout);
+    GPR[R_V0] = fputc(GPR[R_A0], stdout);
 }
 
 void rcg_call(int *GPR, word_type *memory) 
 {
-    GPR[$v0] = getc(stdin);
+    GPR[R_V0] = getc(stdin);
 }
 
 void stra_call()
