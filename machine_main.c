@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
                     break;
                 case JR_F:
                     PC = jr_op(ri, GPR);
+                    JUMP = true;
                     break;
                 case SYSCALL_F:
                     break;
@@ -236,7 +237,6 @@ int main(int argc, char *argv[])
             switch (si.code)
             {
                 case exit_sc:
-                    exit_call();
                     return 0;
                     break;
                 case print_str_sc:

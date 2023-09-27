@@ -130,30 +130,23 @@ void sw_op(immed_instr_t ii, int *GPR, word_type *memory)
 int jmp_op(jump_instr_t ji, int PC)
 {
     int jumpAddr = machine_types_formAddress(PC, ji.addr);
-    printf("Jump Addr: %d\n", jumpAddr); 
     return jumpAddr;
 }
 
 int jal_op(jump_instr_t ji, int PC, int *GPR)
 {
     int jumpAddr = machine_types_formAddress(PC, ji.addr);
-    printf("Jump Addr: %d\n", jumpAddr); 
-    GPR[31] = PC;
+    GPR[31] = PC + 4;
     return jumpAddr;
 }
 
 // System Calls
 
-void exit_call() 
-{
-    exit(0);
-}
-
 void pstr_call(int *GPR, word_type *memory) 
 {
     char *str = (char *)&memory[GPR[R_A0]];
     int res = printf("%s", str);
-    GPR[$v0] = res;
+    GPR[R_V0] = res;
 }
 
 void pch_call(int *GPR) 
