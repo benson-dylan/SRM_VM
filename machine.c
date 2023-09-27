@@ -139,3 +139,37 @@ int jal_op(jump_instr_t ji, int PC, int *GPR)
     GPR[31] = PC;
     return jumpAddr;
 }
+
+// System Calls
+
+void exit_call() 
+{
+    exit(0);
+}
+
+void pstr_call(int *GPR, word_type *memory) 
+{
+    char *str = (char *)&memory[GPR[$a0]];
+    int res = printf("%s", str);
+    GPR[$v0] = res;
+}
+
+void pch_call(int *GPR, word_type *memory) 
+{
+    GPR[$v0] = fputc(GPR[$a0], stdout);
+}
+
+void rcg_call(int *GPR, word_type *memory) 
+{
+    GPR[$v0] = getc(stdin);
+}
+
+void stra_call()
+{
+    // start VM tracing; start tracing output
+}
+
+void notr_call()
+{
+    // no vm tracing; stop tracing output
+}
