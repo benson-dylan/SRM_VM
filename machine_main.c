@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "instruction.h"
 #include "machine_types.h"
 #include "utilities.h"
@@ -7,6 +8,7 @@
 #include "bof.h"
 #include "machine.h"
 
+#define MEM_OUTPUT_LINE_WIDTH 5
 #define MEMORY_SIZE_IN_BYTES (65536 - BYTES_PER_WORD)
 #define HI 0
 #define LO 1
@@ -29,10 +31,10 @@ void initialize_registers(BOFHeader bin_header)
     GPR[SP] = bin_header.stack_bottom_addr; 
 }
 
-void load_words(BOFFILE bf, word_type start_address, word_type read_length)
+void load_words(BOFFILE bf, word_type start_address, int read_length)
 {
-    for (int i = start_address; i < start_address + (read_length / BYTES_PER_WORD); i++)
-        memory.words[i] =  bof_read_word(bf);
+    for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD; i_word++)
+        memory.words[i_word] =  bof_read_word(bf);
 }
 
 void print_GPR(int * GPR)
@@ -49,16 +51,60 @@ void print_GPR(int * GPR)
     printf("\n");
 }
 
+void print_assembly(word_type start_address, int read_length)
+{
+    printf("Addr Instruction\n");
+    for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD; i_word++)
+    {
+        printf("%4d %s\n", i_word * BYTES_PER_WORD, instruction_assembly_form(memory.instrs[i_word]));
+    }
+}
+
+void print_memory(word_type start_address, int read_length)
+{
+    int line_width = 0;
+
+    for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD + 1; i_word++)
+    {
+        word_type word_at_address = memory.words[i_word];
+        printf("%8d: %d\t", i_word * BYTES_PER_WORD, word_at_address);
+        if (word_at_address == 0)
+        {
+            printf("...\n");
+        }
+        else if (++line_width == MEM_OUTPUT_LINE_WIDTH)
+        {
+            printf("\n");
+            line_width = 0;
+        }
+    }    
+}
+
 int main(int argc, char *argv[])  
 {   
     bin_instr_t IR;
-    bool JUMP = false;
+    bool JUMP = false, p_argument = false;
 
     BOFFILE bf;
     if (argc == 2)
+    {
         bf = bof_read_open(argv[1]);
-    else 
+    }
+    else if (argc == 3) 
+    {
+        if (strcmp(argv[1], "-p") != 0)
+        {
+            printf("Invalid arguments.\n");
+            return 1;
+        }
         bf = bof_read_open(argv[2]);
+        p_argument = true;
+    }
+    else 
+    {
+        printf("Invalid arguments.\n");
+        return 1;
+    }
 
     // Initialize header values
     BOFHeader bfh = bof_read_header(bf);
@@ -74,6 +120,14 @@ int main(int argc, char *argv[])
 
     load_words(bf, PC, bfh.text_length); // Load instructions
     load_words(bf, GPR[GP], bfh.data_length); // Load data
+
+    // Print the program and exit without running
+    if (p_argument)
+    {
+        print_assembly(bfh.text_start_address, bfh.text_length);
+        print_memory(bfh.data_start_address, bfh.data_length);
+        return 0;
+    }
 
     while (true)
     {
