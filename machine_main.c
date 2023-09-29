@@ -31,24 +31,11 @@ void initialize_registers(BOFHeader bin_header)
     GPR[SP] = bin_header.stack_bottom_addr; 
 }
 
+// Read words into memory starting at an address, given the number of bytes to read
 void load_words(BOFFILE bf, word_type start_address, int read_length)
 {
     for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD; i_word++)
         memory.words[i_word] =  bof_read_word(bf);
-}
-
-void print_GPR(int * GPR)
-{
-    printf("PC: %d\n", PC);
-
-    for (int i = 0; i < 32; i++)
-    {
-        if (i % 6 == 0 && i != 0)
-            printf("\n");
-        printf("GPR[%s]: %d   ", regname_get(i), GPR[i]);
-    }
-
-    printf("\n");
 }
 
 void print_assembly(word_type start_address, int read_length)
@@ -60,17 +47,19 @@ void print_assembly(word_type start_address, int read_length)
     }
 }
 
-void print_memory(word_type start_address, int read_length)
+// Print values in memory from start address to end address (inclusive)
+void print_memory(word_type start_address, word_type end_address)
 {
     int line_width = 0;
 
-    for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD + 1; i_word++)
+    for (int i_word = start_address / BYTES_PER_WORD; i_word <= end_address / BYTES_PER_WORD; i_word++)
     {
         word_type word_at_address = memory.words[i_word];
         printf("%8d: %d\t", i_word * BYTES_PER_WORD, word_at_address);
         if (word_at_address == 0)
         {
             printf("...\n");
+            return;
         }
         else if (++line_width == MEM_OUTPUT_LINE_WIDTH)
         {
@@ -78,12 +67,40 @@ void print_memory(word_type start_address, int read_length)
             line_width = 0;
         }
     }    
+    printf("\n");
+}
+
+
+
+void print_trace(BOFHeader bin_header)
+{
+    // PC with HI and LO
+    printf("      PC: %d", PC);
+    if(HI_LO[HI] != 0 || HI_LO[LO] != 0)
+    {
+        printf("\tHI: %d\tLO: %d", HI_LO[HI], HI_LO[LO]);
+    } 
+    printf("\n");
+
+    // GPR
+    for (int i = 0; i < 32; i++)
+    {
+        if (i % 6 == 0 && i != 0)
+            printf("\n");
+        printf("GPR[%-3s]: %-4d\t", regname_get(i), GPR[i]);
+    }
+    printf("\n");
+    // Data in memory
+    print_memory(GPR[GP], GPR[SP] - BYTES_PER_WORD);
+    print_memory(GPR[SP], GPR[FP]);
+    // Instruction in assembly 
+    printf("==> addr:%5d %s\n", PC, instruction_assembly_form(memory.instrs[PC / BYTES_PER_WORD]));
 }
 
 int main(int argc, char *argv[])  
-{   
+{
     bin_instr_t IR;
-    bool JUMP = false, p_argument = false;
+    bool JUMP = false, tracing = true, p_argument = false;
 
     BOFFILE bf;
     if (argc == 2)
@@ -125,17 +142,18 @@ int main(int argc, char *argv[])
     if (p_argument)
     {
         print_assembly(bfh.text_start_address, bfh.text_length);
-        print_memory(bfh.data_start_address, bfh.data_length);
+        print_memory(GPR[GP], GPR[SP] - BYTES_PER_WORD);
         return 0;
     }
 
     while (true)
     {
-        print_GPR(GPR);
         JUMP = false;
-
         // Load instruction from memory
         IR = memory.instrs[PC / BYTES_PER_WORD];
+
+        if (tracing)
+            print_trace(bfh);
 
         if (instruction_type(IR) == reg_instr_type)
         {
@@ -304,9 +322,11 @@ int main(int argc, char *argv[])
                     break;
                 case start_tracing_sc:
                     // stra_call();
+                    tracing = true;
                     break;
                 case stop_tracing_sc:
                     // notr_call();
+                    tracing = false;
                     break;
             }
         }
