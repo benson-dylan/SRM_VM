@@ -269,13 +269,13 @@ int main(int argc, char *argv[])
                     }
                     break;
                 case LBU_O:
-                    lbu_op(ii, GPR, memory.words);
+                    lbu_op(ii, GPR, memory.bytes);
                     break;
                 case LW_O:
                     lw_op(ii, GPR, memory.words);
                     break;
                 case SB_O:
-                    sb_op(ii, GPR, memory.words);
+                    sb_op(ii, GPR, memory.bytes);
                     break;
                 case SW_O:
                     sw_op(ii, GPR, memory.words);

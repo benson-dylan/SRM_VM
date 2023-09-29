@@ -105,24 +105,24 @@ int branch_op(immed_instr_t ii, int *GPR)
     return machine_types_formOffset(ii.immed);
 }
 
-void lbu_op(immed_instr_t ii, int *GPR, word_type *memory)
+void lbu_op(immed_instr_t ii, int *GPR, byte_type *memory)
 {
     GPR[ii.rt] = machine_types_zeroExt(memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)]);
 }
 
 void lw_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
-    GPR[ii.rt] = memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)];
+    GPR[ii.rt] = memory[(GPR[ii.rs] + machine_types_formOffset(ii.immed)) / BYTES_PER_WORD];
 }
 
-void sb_op(immed_instr_t ii, int *GPR, word_type *memory)
+void sb_op(immed_instr_t ii, int *GPR, byte_type *memory)
 {
-    memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = (uint8_t) GPR[ii.rt];
+    memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = (byte_type)(0xFF & GPR[ii.rt]);
 }
 
 void sw_op(immed_instr_t ii, int *GPR, word_type *memory)
 {
-    memory[GPR[ii.rs] + machine_types_formOffset(ii.immed)] = GPR[ii.rt];
+    memory[(GPR[ii.rs] + machine_types_formOffset(ii.immed)) / BYTES_PER_WORD] = GPR[ii.rt];
 }
 
 // Jump Operations

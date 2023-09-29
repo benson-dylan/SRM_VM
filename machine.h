@@ -40,11 +40,11 @@ void xori_op(immed_instr_t ii, int *GPR);
 
 int branch_op(immed_instr_t ii, int *GPR);
 
-void lbu_op(immed_instr_t ii, int *GPR, word_type *memory);
+void lbu_op(immed_instr_t ii, int *GPR, byte_type *memory);
 
 void lw_op(immed_instr_t ii, int *GPR, word_type *memory);
 
-void sb_op(immed_instr_t ii, int *GPR, word_type *memory);
+void sb_op(immed_instr_t ii, int *GPR, byte_type *memory);
 
 void sw_op(immed_instr_t ii, int *GPR, word_type *memory);
 
