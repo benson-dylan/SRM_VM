@@ -58,16 +58,21 @@ void print_memory(word_type start_address, word_type end_address)
         printf("%8d: %d\t", i_word * BYTES_PER_WORD, word_at_address);
         if (word_at_address == 0)
         {
-            printf("...\n");
-            return;
+            printf("...\t");
+            while (i_word < end_address / BYTES_PER_WORD && memory.words[i_word + 1] == 0)
+            {
+                i_word++;
+            }
         }
-        else if (++line_width == MEM_OUTPUT_LINE_WIDTH)
+        if (++line_width == MEM_OUTPUT_LINE_WIDTH)
         {
             printf("\n");
             line_width = 0;
         }
     }    
-    printf("\n");
+   
+   if (line_width > 0)
+    printf("\n");    
 }
 
 
@@ -91,7 +96,7 @@ void print_trace(BOFHeader bin_header)
     }
     printf("\n");
     // Data in memory
-    print_memory(GPR[GP], GPR[SP] - BYTES_PER_WORD);
+    print_memory(GPR[GP], GPR[GP] + bin_header.data_length);
     print_memory(GPR[SP], GPR[FP]);
     // Instruction in assembly 
     printf("==> addr:%5d %s\n", PC, instruction_assembly_form(memory.instrs[PC / BYTES_PER_WORD]));
@@ -142,7 +147,7 @@ int main(int argc, char *argv[])
     if (p_argument)
     {
         print_assembly(bfh.text_start_address, bfh.text_length);
-        print_memory(GPR[GP], GPR[SP] - BYTES_PER_WORD);
+        print_memory(GPR[GP], GPR[GP] + bfh.data_length);
         return 0;
     }
 
