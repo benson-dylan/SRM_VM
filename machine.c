@@ -102,7 +102,7 @@ void xori_op(immed_instr_t ii, int *GPR)
 
 int branch_op(immed_instr_t ii, int *GPR)
 {
-    return machine_types_formOffset(ii.immed);
+    return machine_types_formOffset(ii.immed) + 4;
 }
 
 void lbu_op(immed_instr_t ii, int *GPR, byte_type *memory)
