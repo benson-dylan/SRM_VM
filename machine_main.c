@@ -31,13 +31,14 @@ void initialize_registers(BOFHeader bin_header)
     GPR[SP] = bin_header.stack_bottom_addr; 
 }
 
-// Read words into memory starting at an address, given the number of bytes to read
+// Read words into memory, given the number of bytes to read and the start address
 void load_words(BOFFILE bf, word_type start_address, int read_length)
 {
     for (int i_word = start_address / BYTES_PER_WORD; i_word < (start_address + read_length) / BYTES_PER_WORD; i_word++)
         memory.words[i_word] =  bof_read_word(bf);
 }
 
+// Print disassembled instructions, given their length in bytes
 void print_assembly(word_type start_address, int read_length)
 {
     printf("Addr Instruction\n");
@@ -47,15 +48,16 @@ void print_assembly(word_type start_address, int read_length)
     }
 }
 
-// Print values in memory from start address to end address (inclusive)
+// Print from start address to end address, inclusive
 void print_memory(word_type start_address, word_type end_address)
 {
     int line_width = 0;
-
+    
     for (int i_word = start_address / BYTES_PER_WORD; i_word <= end_address / BYTES_PER_WORD; i_word++)
     {
         word_type word_at_address = memory.words[i_word];
         printf("%8d: %d\t", i_word * BYTES_PER_WORD, word_at_address);
+        
         if (word_at_address == 0)
         {
             printf("...\t");
@@ -69,14 +71,13 @@ void print_memory(word_type start_address, word_type end_address)
             printf("\n");
             line_width = 0;
         }
-    }    
-   
+    }  
+
    if (line_width > 0)
     printf("\n");    
 }
 
-
-
+// Print current state of the machine in human readable format
 void print_trace(BOFHeader bin_header)
 {
     // PC with HI and LO
@@ -95,10 +96,12 @@ void print_trace(BOFHeader bin_header)
         printf("GPR[%-3s]: %-4d\t", regname_get(i), GPR[i]);
     }
     printf("\n");
+
     // Data in memory
     print_memory(GPR[GP], GPR[GP] + bin_header.data_length);
     print_memory(GPR[SP], GPR[FP]);
-    // Instruction in assembly 
+
+    // Instruction as assembly 
     printf("==> addr:%5d %s\n", PC, instruction_assembly_form(memory.instrs[PC / BYTES_PER_WORD]));
 }
 
@@ -106,8 +109,9 @@ int main(int argc, char *argv[])
 {
     bin_instr_t IR;
     bool JUMP = false, tracing = true, p_argument = false;
-
     BOFFILE bf;
+
+    // Read in BOF file and validate command line arguments
     if (argc == 2)
     {
         bf = bof_read_open(argv[1]);
