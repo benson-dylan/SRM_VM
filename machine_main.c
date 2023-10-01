@@ -105,6 +105,21 @@ void print_trace(BOFHeader bin_header)
     printf("==> addr:%5d %s\n", PC, instruction_assembly_form(memory.instrs[PC / BYTES_PER_WORD]));
 }
 
+// Halts program if any invariants are validated
+void validate_invariants()
+{
+    if (PC % BYTES_PER_WORD != 0 || PC < 0)
+        bail_with_error("Invalid address in PC");
+    if (GPR[GP] % BYTES_PER_WORD != 0 || GPR[GP] < 0 || GPR[GP] >= GPR[SP])
+        bail_with_error("Invalid address in globals pointer.");
+    if (GPR[SP] % BYTES_PER_WORD != 0 || GPR[SP] > GPR[FP])
+        bail_with_error("Invalid address in stack pointer.");
+    if (GPR[FP] % BYTES_PER_WORD != 0 || GPR[FP] >= MEMORY_SIZE_IN_BYTES)
+        bail_with_error("Invalid address in frame pointer.");
+    if (GPR[0] != 0)
+        bail_with_error("GPR[$0] has non-zero value.");
+}
+
 int main(int argc, char *argv[])  
 {
     bin_instr_t IR;
@@ -157,6 +172,7 @@ int main(int argc, char *argv[])
 
     while (true)
     {
+        validate_invariants();
         JUMP = false;
         // Load instruction from memory
         IR = memory.instrs[PC / BYTES_PER_WORD];
