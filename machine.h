@@ -62,6 +62,4 @@ void pch_call(int* GPR);
 
 void rch_call(int *GPR);
 
-// missing stra and notr calls 
-
 #endif

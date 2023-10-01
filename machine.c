@@ -159,12 +159,3 @@ void rch_call(int *GPR)
     GPR[R_V0] = getc(stdin);
 }
 
-void stra_call()
-{
-    // start VM tracing; start tracing output
-}
-
-void notr_call()
-{
-    // no vm tracing; stop tracing output
-}

@@ -162,8 +162,6 @@ int main(int argc, char *argv[])
 
         if (instruction_type(IR) == reg_instr_type)
         {
-            // printf("Register Operation\n");
-
             reg_instr_t ri = IR.reg;
             switch (ri.func)
             {
@@ -214,8 +212,6 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == immed_instr_type)
         {
-            // printf("Immediate Operation\n");
-
             immed_instr_t ii = IR.immed;
             switch (ii.op)
             {
@@ -290,8 +286,6 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == jump_instr_type)
         {
-            // printf("Jump Operation\n");
-
             jump_instr_t ji = IR.jump;
             switch (ji.op)
             {
@@ -308,8 +302,6 @@ int main(int argc, char *argv[])
 
         else if (instruction_type(IR) == syscall_instr_type)
         {
-            // printf("Syscall Operation\n");
-
             syscall_instr_t si = IR.syscall;
             switch (si.code)
             {
@@ -326,11 +318,9 @@ int main(int argc, char *argv[])
                     rch_call(GPR);
                     break;
                 case start_tracing_sc:
-                    // stra_call();
                     tracing = true;
                     break;
                 case stop_tracing_sc:
-                    // notr_call();
                     tracing = false;
                     break;
             }
